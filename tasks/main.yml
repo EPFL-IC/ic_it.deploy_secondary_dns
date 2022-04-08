@@ -1,2 +1,86 @@
 ---
 # tasks file for ic_it.deploy_secondary_dns
+- name: ensure that pip3 is present
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: install required dependencies to manage docker containers
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - docker
+    - docker-compose
+
+- name: Pull the bind9 image
+  docker_image:
+    name: ubuntu/bind9
+    source: pull
+
+- name: update netplan configuration to use Google and Cloudflare DNSs
+  template:
+    src: 01-netcfg.yaml
+    dest: /etc/netplan/01-netcfg.yaml
+  register: netplan_updated
+
+- name: apply the netplan configuration
+  shell: netplan apply
+  when: netplan_updated.changed
+
+- name: turn off the default DNS stub listener
+  lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^DNSStubListener=.*$'
+    line: DNSStubListener=no
+    state: present
+  register: was_locked
+
+- name: restart the systemd-resolved service
+  service:
+    name: systemd-resolved
+    state: restarted
+  when: was_locked.changed
+
+# https://askubuntu.com/questions/973017/wrong-nameserver-set-by-resolvconf-and-networkmanager
+# systemd-resolve may fail to refresh the list of dns servers. Need to refresh the link to /etc/resolv.conf
+- name: clear out the /etc/resolv.conf link
+  file:
+    path: /etc/resolv.conf
+    force: yes
+    state: absent
+
+- name: re-create the /etc/resolv.conf link
+  file:
+    path: /etc/resolv.conf
+    src: /run/systemd/resolve/resolv.conf
+    state: link
+    force: yes
+
+- name: ensure that the destination folder exists
+  file:
+    state: directory
+    path: "{{ bind_path }}"
+
+- name: ensure that deployment path exists
+  file:
+    state: directory
+    path: "{{ bind_path}}"
+
+- name: deploy the dns configuration that will be used
+  template:
+    src: named.conf.local
+    dest: "{{ bind_path }}/named.conf.local"
+
+- name: deploy the docker-compose template
+  template:
+    src: docker-compose.yml
+    dest: "{{ bind_path }}/docker-compose.yml"
+
+- name: start the docker containers
+  shell:
+    chdir: "{{ bind_path }}"
+    cmd: docker-compose up -d
+  become: yes

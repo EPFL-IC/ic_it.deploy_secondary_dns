@@ -1,0 +1,11 @@
+zone "iccluster.epfl.ch" {
+  type slave;
+  file "/etc/bind/iccluster.epfl.ch.zone";
+  masters { 10.90.36.3; };
+};
+
+zone "90.10.in-addr-arpa" {
+  type slave;
+  file "/etc/bind/10.90.zone";
+  masters { 10.90.36.3; };
+};

@@ -1,0 +1,14 @@
+services:
+  dns:
+    image: ubuntu/bind9
+    restart: unless-stopped
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    volumes:
+      - bind9:/etc/bind
+      - $PWD/named.conf.local:/etc/bind/named.conf.local:ro
+    environment:
+      - TZ=Europe/Zurich
+volumes:
+  bind9:
