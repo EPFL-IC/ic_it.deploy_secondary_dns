@@ -69,10 +69,15 @@
     state: directory
     path: "{{ bind_path}}"
 
-- name: deploy the dns configuration that will be used
+- name: deploy the dns configuration (named.conf.local) that will be used
   template:
     src: named.conf.local
     dest: "{{ bind_path }}/named.conf.local"
+
+- name: deploy the dns configuration (named.conf.options) that will be used
+  template:
+    src: named.conf.options
+    dest: "{{ bind_path }}/named.conf.options"
 
 - name: deploy the docker-compose template
   template:

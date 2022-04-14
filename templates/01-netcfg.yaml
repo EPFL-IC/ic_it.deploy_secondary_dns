@@ -3,8 +3,12 @@ network:
   renderer: networkd
   ethernets:
     {{ ansible_default_ipv4.interface }}:
-      dhcp4: true
+      dhcp4: false
       dhcp6: false
       optional: true
+      addresses: [10.90.36.14/24, 10.90.36.4/24]
+      routes:
+        - to: 0.0.0.0/0
+          via: 10.90.36.1
       nameservers:
         addresses: [128.178.15.8,128.178.15.7,8.8.8.8,1.1.1.1]

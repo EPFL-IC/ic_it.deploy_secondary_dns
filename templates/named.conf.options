@@ -1,0 +1,27 @@
+acl icclusterclients {
+  10.0.0.0/8;
+  localhost;
+  128.178.0.0/16;
+  128.179.0.0/16;
+  35.199.192.0/19;
+};
+
+options {
+  directory "/var/cache/bind";
+
+  forwarders {
+    128.178.15.8;
+    128.178.15.7;
+  };
+
+  recursion yes;
+  allow-recursion { icclusterclients; };
+  allow-query { icclusterclients; };
+  allow-query-cache { icclusterclients; };
+  allow-notify { icclusterclients; };
+
+  dnssec-validation no;
+  dnssec-enable no;
+
+  listen-on-v6 { any; };
+};

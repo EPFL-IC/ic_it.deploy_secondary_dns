@@ -8,6 +8,7 @@ services:
     volumes:
       - bind9:/etc/bind
       - $PWD/named.conf.local:/etc/bind/named.conf.local:ro
+      - $PWD/named.conf.options:/etc/bind/named.conf.options:ro
     environment:
       - TZ=Europe/Zurich
 volumes:
