@@ -17,7 +17,7 @@
 
 - name: Pull the bind9 image
   docker_image:
-    name: ubuntu/bind9
+    name: ubuntu/bind9:9.16-20.04_edge
     source: pull
 
 - name: update netplan configuration to use Google and Cloudflare DNSs

@@ -1,6 +1,6 @@
 services:
   dns:
-    image: ubuntu/bind9
+    image: ubuntu/bind9:9.16-20.04_edge
     restart: unless-stopped
     ports:
       - "53:53/udp"
